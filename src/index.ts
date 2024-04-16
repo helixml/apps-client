@@ -3,6 +3,7 @@ import axios from 'axios'
 export interface ClientOptions {
   token: string,
   url?: string,
+  runScriptPath?: string,
 }
 
 export interface RunScriptRequest {
@@ -20,6 +21,7 @@ const DEFAULT_DEVELOPMENT_URL = 'http://localhost:8005'
 
 const ClientFactory = (options: ClientOptions) => {
   const isDevelopment = window.location.hostname === 'localhost'
+  const runScriptPath = options.runScriptPath || (isDevelopment ? '/api/v1/run/development' : '/api/v1/apps/script')
   let url = options.url
   if(!url) {
     if (isDevelopment) {
@@ -38,12 +40,11 @@ const ClientFactory = (options: ClientOptions) => {
       headers.Authorization = `Bearer ${options.token}`
     }
     const response = await axios({
-      method: 'POST',
-      url: `${options.url}/api/v1/apps/script`,
+      method: 'post',
+      url: `${url}${runScriptPath}`,
       headers,
       data: req,
     })
-
     const result = response.data as RunScriptResponse
     return result
   }
